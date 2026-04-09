@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Stark Bank</title>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+<body>
+    
+
+    <!-- Login Form -->
+    <div class="login-container">
+        <h1 class="login-title">STARK BANK</h1>
+        <p class="subtitle">Bank Churn Prediction System v1.0</p>
+
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required value="{{ username|default:'' }}">
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" class="login-btn">ACCESS GRANTED</button>
+        </form>
+
+        
+    </div>
+
+    <!-- Hide loading screen after 1.8 seconds -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(() => {
+                const loader = document.getElementById('loading');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 300);
+                }
+            }, 1800);
+        });
+    </script>
+</body>
+</html>

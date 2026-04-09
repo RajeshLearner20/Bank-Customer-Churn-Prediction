@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>ChurnPredict</h2>
+            <p>AI Analytics</p>
+        </div>
+
+        <nav>
+            <ul>
+                <li><a href="{% url 'dashboard' %}" class="active"><i class="icon-dashboard"></i> Dashboard</a></li>
+                <li><a href="/customers/"><i class="icon-customers"></i> Customers</a></li>
+                <li><a href="/add-customer/"><i class="icon-add"></i> Add Customer</a></li>
+                <li><a href="/upload-data/"><i class="icon-upload"></i> Upload Data</a></li>
+                <li><a href="{% url 'predict' %}"><i class="icon-predict"></i> Predict Churn</a></li>
+            </ul>
+        </nav>
+
+        <div class="user-panel">
+            <div class="user-info">
+                <div class="avatar">A</div>
+                <div class="details">
+                    <span>{{ request.user.username|default:"admin" }}</span>
+                    <small>admin@yopmail.com</small>
+                </div>
+            </div>
+            <a href="{% url 'logout' %}" class="logout-btn"><i class="icon-logout"></i> Logout</a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- PAGE HEADER -->
+        <header class="page-header">
+            <h1>Dashboard</h1>
+            <p>Monitor customer churn predictions and retention metrics</p>
+        </header>
+
+        <!-- METRICS CARDS -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span>Total Customers</span>
+                </div>
+                <div class="metric-value">{{ total_customers }}</div>
+                <div class="metric-change">+{{ total_growth }}% from last month</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span>High Risk Customers</span>
+                </div>
+                <div class="metric-value">{{ high_risk }}</div>
+                <div class="metric-change">{{ high_risk_change }} from last month</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span>Retention Rate</span>
+                </div>
+                <div class="metric-value">{{ retention_rate }}%</div>
+                <div class="metric-change">+{{ retention_change }}% improvement</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span>Monthly Revenue</span>
+                </div>
+                <div class="metric-value">${{ monthly_revenue }}K</div>
+                <div class="metric-change">+{{ revenue_change }}% from last month</div>
+            </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="charts-row">
+
+            <!-- LINE CHART -->
+            <div class="chart-card">
+                <h3>Churn Rate Trend</h3>
+                <canvas id="churnTrendChart" height="200"></canvas>
+            </div>
+
+            <!-- DONUT CHART -->
+            <div class="chart-card">
+                <h3>Risk Distribution</h3>
+                <canvas id="riskChart" height="140"></canvas>
+            </div>
+        </div>
+
+        <!-- HIGH RISK CUSTOMERS TABLE -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3>High Risk Customers</h3>
+                <a href="#" class="view-all">View all →</a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Country</th>
+                        <th>Risk Score</th>
+                        <th>Account Balance</th>
+                        <th>Tenure</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if high_risk_customers %}
+                    {% for customer in high_risk_customers %}
+                    <tr>
+                        <td>
+                            <div class="customer-info">
+                                <div class="avatar">{{ customer.customer_id|first|upper }}</div>
+                                <div>
+                                    <strong>{{ customer.customer_id }}</strong>
+                                    <small>{{ customer.gender }} | {{ customer.age }} yrs</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ customer.country }}</td>
+                        <td>
+                            <span class="risk-badge high">
+                                High ({{ customer.probability|floatformat:2 }}%)
+                            </span>
+                        </td>
+                        <td>${{ customer.balance }}</td>
+                        <td>{{ customer.tenure }} yrs</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#888;">
+                            No high risk customers found
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+</div>
+
+<!-- CHART JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+
+<script>
+    /* =======================
+       CHURN TREND LINE CHART
+    ======================= */
+    const churnCtx = document.getElementById('churnTrendChart').getContext('2d');
+    new Chart(churnCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Predicted Churn',
+                data: [5, 8, 6, 10, 7, Number("{{ high_risk|default:0 }}")],
+                borderColor: '#00ffff',
+                backgroundColor: 'rgba(0,255,255,0.1)',
+
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#00ffff' } } },
+            scales: {
+                x: { ticks: { color: '#00ffff' } },
+                y: { ticks: { color: '#00ffff' } }
+            }
+        }
+    });
+
+    /* =======================
+       RISK DONUT CHART
+    ======================= */
+    const riskCtx = document.getElementById('riskChart').getContext('2d');
+    new Chart(riskCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+            datasets: [{
+                data: [
+                    Number("{{ low_risk|default:0 }}"),
+                    Number("{{ medium_risk|default:0 }}"),
+                    Number("{{ high_risk|default:0 }}")
+                ],
+                backgroundColor: ['#00cc66', '#ffaa00', '#ff4444']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#00ffff' } } }
+        }
+    });
+</script>
+{% endblock %}

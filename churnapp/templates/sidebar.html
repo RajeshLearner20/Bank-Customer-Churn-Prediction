@@ -1,0 +1,46 @@
+{% load static %}
+
+<aside class="sidebar">
+    <div class="logo">
+        <h2>ChurnPredict</h2>
+        <p>AI Analytics</p>
+    </div>
+
+    <nav>
+        <ul>
+            <li><a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}active{% endif %}">
+                <i class="icon-dashboard"></i> Dashboard</a>
+            </li>
+
+            <li><a href="/customers/" class="{% if request.path == '/customers/' %}active{% endif %}">
+                <i class="icon-customers"></i> Customers</a>
+            </li>
+
+            <li><a href="/add-customer/" class="{% if request.path == '/add-customer/' %}active{% endif %}">
+                <i class="icon-add"></i> Add Customer</a>
+            </li>
+
+            <li><a href="/upload-data/" class="{% if request.path == '/upload-data/' %}active{% endif %}">
+                <i class="icon-upload"></i> Upload Data</a>
+            </li>
+
+            <li><a href="{% url 'predict' %}" class="{% if request.path == '/predict/' %}active{% endif %}">
+                <i class="icon-predict"></i> Predict Churn</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="user-panel">
+        <div class="user-info">
+            <div class="avatar">{{ request.user.username|first|upper }}</div>
+            <div class="details">
+                <span>{{ request.user.username|default:"admin" }}</span>
+                <small>admin@yopmail.com</small>
+            </div>
+        </div>
+
+        <a href="{% url 'logout' %}" class="logout-btn">
+            <i class="icon-logout"></i> Logout
+        </a>
+    </div>
+</aside>

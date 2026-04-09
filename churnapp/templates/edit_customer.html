@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=2">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    {% include "sidebar.html" %}
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Edit Customer</h1>
+            <p>Update customer details manually</p>
+        </header>
+
+        <div class="form-card">
+            <form method="POST" class="customer-form">
+                {% csrf_token %}
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Customer ID</label>
+                        <input type="text" name="customer_id" value="{{ customer.customer_id }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Credit Score</label>
+                        <input type="number" name="credit_score" value="{{ customer.credit_score }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Country</label>
+                        <input type="text" name="country" value="{{ customer.country }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select name="gender">
+                            <option value="Male" {% if customer.gender=="Male" %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if customer.gender=="Female" %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Age</label>
+                        <input type="number" name="age" value="{{ customer.age }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tenure</label>
+                        <input type="number" name="tenure" value="{{ customer.tenure }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Balance</label>
+                        <input type="number" name="balance" step="0.01" value="{{ customer.balance }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Salary</label>
+                        <input type="number" name="salary" step="0.01" value="{{ customer.salary }}" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="save-btn">Update Customer</button>
+                </div>
+            </form>
+
+        </div>
+    </main>
+</div>
+{% endblock %}
